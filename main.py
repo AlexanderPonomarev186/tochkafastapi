@@ -1,34 +1,39 @@
 import os
-from typing import Union
-
 import uvicorn
-import json
-from fastapi import FastAPI, Request, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
-from fastapi.responses import Response
+from fastapi import FastAPI, Depends, HTTPException, Request
+from pathlib import Path
+from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-import botofunctions
+import uuid
+
+from starlette import status
+
 import crud
 import models
 import schemas
-import api
-import utils
-import cloudfunctions
 import fastapi_jsonrpc as jsonrpc
-from database import SessionLocal, engine
+from database import engine, get_db
+from login import get_current_user, router_jwt
+from api import router_api
 
 models.Base.metadata.create_all(bind=engine)
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 app = FastAPI()
 
+app.include_router(router_jwt)
+app.include_router(router_api)
 
 
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount(
+    "/static",
+    StaticFiles(directory=Path(__file__).parent.absolute() / "static"),
+    name="static",
+)
 templates = Jinja2Templates(directory="templates")
 files = {
     item: os.path.join('samples_directory', item)
@@ -38,82 +43,72 @@ files = {
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=5000, reload=True)
 
-origins = [
-    "http://localhost",
-    "http://localhost:5000",
-    "http://localhost:5500",
-    "http://127.0.0.1:5500",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 
 # Dependency
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
-@app.post("/users/", response_model=schemas.User)
-async def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email.lower())
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    return crud.create_user(db=db, user=user)
-
-# @app.get("/users/", response_model=list[schemas.User])
-# def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     users = crud.get_users(db, skip=skip, limit=limit)
-#     return users
-
-
-@app.get("/users/{user_id}", response_model=schemas.User)
-async def read_user(user_id: int, db: Session = Depends(get_db)):
+@app.get("/users/{user_id}")
+async def read_user(user_id: uuid.UUID, db: Session = Depends(get_db)):
     db_user = crud.get_user(db, user_id=user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
-@app.post("/users/check_password")
-async def check_password(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email.lower())
+
+@app.get("/users_by_email/{user_email}")
+async def read_user_by_email(user_email: str, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email=user_email)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    validate = utils.validate_password(user.password, db_user.hashed_password, db_user.salt)
-    if not validate:
-        raise HTTPException(status_code=400, detail="Wrong password")
     return db_user
 
 
-@app.get("/api/get_video/{video_name}")
-async def get_video(video_name: str):
-    return api.get_video_api(video_name, files)
+@app.get("/well_done")
+async def well_done(user: schemas.User = Depends(get_current_user)):
+    return "Well done " + user.email
 
 
-@app.get("/api/get_video_s3/{video_name}")
-async def get_video_s3(video_name:str):
-    return RedirectResponse(botofunctions.create_presigned_url(video_name))
 
 
 @app.get('/play_video/{video_name}')
-async def play_video(video_name: str, request: Request, response_class=HTMLResponse):
-    video_path = files.get(video_name)
-    if video_path:
+async def play_video(video_name: str, request: Request):
+    # video_path = files.get(video_name)
+    # if video_path:
         return templates.TemplateResponse(
-            'play_html5.html', {'request': request, 'video': {'path': video_path, 'name': video_name}})
-    else:
-        return Response(status_code=404)
+            'play_html5.html', {'request': request, 'video': {'name': video_name}})
+    # else:
+    #     return Response(status_code=404)
 
-@app.post("/api/upload_video")
-async def upload_video(video:schemas.Video):
-    cloudfunctions.put_file_to_server(video.video_path)
-    return { "response":True}
+@app.get("/login_access")
+async def login_on_site(request:Request):
+    try:
+        id = uuid.UUID(request.cookies.get("User_id"))
+        user = crud.get_user_by_id(next(get_db()),id)
+        return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email}})
+    except:
+        return templates.TemplateResponse("login.html", {"request": request})
+
+@app.get("/signin")
+async def signin(request:Request):
+    return templates.TemplateResponse("Signin.html", {"request": request})
+
+@app.post("/user/{user_id}")
+async def user_page(request:Request, user_id:uuid.UUID, db: Session = Depends(get_db)):
+    try:
+        if request.cookies.get("User_id") != str(user_id):
+            raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+        )
+        user = crud.get_user_by_id(db,user_id)
+        return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email}})
+    except:
+        raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+

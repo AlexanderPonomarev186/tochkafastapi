@@ -1,0 +1,39 @@
+.button
+{
+    /* OB Forms/Submit */
+
+
+box-sizing: border-box;
+
+/* Auto layout */
+
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 10px 15px;
+margin-bottom: 20px;
+/*position: absolute;*/
+width: 170px;
+height: 41px;
+
+background: #5E5BFF;
+border: 1px solid #5E5BFF;
+border-radius: 5px;
+    text-decoration-color: white;
+}
+.login
+{
+    width: 661px;
+    height: 48px;
+}
+.password
+{
+    margin-bottom: 50px;
+    width: 661px;
+    height: 48px;
+}
+.button a
+{
+    text-decoration: none;
+}

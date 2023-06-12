@@ -1,0 +1,24 @@
+.header {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 20px 55px;
+    margin: 0;
+    list-style: none;
+    margin-bottom:30px;
+}
+.header .h {
+    font-size: 32px;
+    line-height: 18px;
+        /* or 56% */
+
+    text-transform: uppercase;
+    margin-right: 500px;
+}
+.header a{
+    margin-right:40px;
+    text-decoration:none;
+}
+
+.body{
+    background: azure;
+}

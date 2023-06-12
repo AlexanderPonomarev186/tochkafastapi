@@ -9,23 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <link href="../static/style.css" rel="stylesheet">
-   <title>Play video</title>
+   <title>{{user.user_id}}</title>
 </head>
-<body class="body">
-    <header class="header">
-        <a href="asd.html" class="h">Main Page</a>
-        <a href="/login_access">Login</a>
-    </header>
-<div class="plyr">
-   <h1 class="plyr__headline">This is Plyr.io</h1>
-   <video class="player__first" id="player" autoplay playsinline controls>
-      <source src="/api/get_video_s3/{{video.name}}" type="video/mp4" />
-   </video>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-<script src="https://cdn.plyr.io/3.6.8/plyr.js"></script>
-<script>
-   const player = new Plyr('#player');
-</script>
+<body>
+    <h1>{{user.user_login}}</h1>
+    <h2>{{user.user_id}}</h2>
+<form method="post" action="/login/logout">
+    <input type="submit" value="logout">
+</form>
+  <form enctype="multipart/form-data" method="post" action="/api/upload_video">
+   <p><input type="file" name="file">
+   <input type="submit" value="Отправить"></p>
+  </form>
 </body>
 </html>

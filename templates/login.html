@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="../static/login.css" rel="stylesheet">
+</head>
+<body>
+ <form enctype="application/x-www-form-urlencoded" method="post" action="/login/token">
+     <p>Username</p>
+     <input name="username" class="login" required>
+     <p>Password</p>
+     <input name="password" class="password" id="password" required>
+     <input class="button" role="button" type="submit" value="Войти">
+     <a class="button" href="../signin">Регистрация</a>
+ </form>
+</body>
+</html>

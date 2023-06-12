@@ -1,20 +1,32 @@
-from fastapi.responses import StreamingResponse, FileResponse
-from fastapi.responses import Response
-from fastapi import FastAPI, Request
-import requests
+import os
+from typing import Union
+from fastapi import Depends, APIRouter, UploadFile
+from starlette.responses import JSONResponse, RedirectResponse
+
 import botofunctions
+import cloudfunctions
+import schemas
+from login import get_current_user
+
+router_api = APIRouter(prefix="/api")
 
 
-def get_video_api(video_name: str, files:dict, response_class=StreamingResponse):
-    video_path = files.get(video_name)
-    if video_path:
-        return StreamingResponse(open(video_path, 'rb'))
-    else:
-        return Response(status_code=404)
+@router_api.get("/get_video_s3/{video_name}")
+async def get_video_s3(video_name:str):
+    return RedirectResponse(botofunctions.create_presigned_url(video_name))
 
 
 
-def get_video_s3(video_name:str):
-    return botofunctions.create_presigned_url('tochkateststorage', video_name)
-    # if url is not None:
-    #     response = requests.get(url)
+@router_api.post("/upload_video")
+async def upload_video(file: Union[UploadFile, None] = None):
+    try:
+        contents = file.file.read()
+        with open(file.filename, 'wb') as f:
+            f.write(contents)
+    except Exception:
+        return {"message": "There was an error uploading the file"}
+    finally:
+        file.file.close()
+    cloudfunctions.put_file_to_server(file.filename)
+    os.remove(file.filename)
+    return {"response": True}
