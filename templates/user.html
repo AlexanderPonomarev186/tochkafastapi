@@ -18,8 +18,11 @@
     <input type="submit" value="logout">
 </form>
   <form enctype="multipart/form-data" method="post" action="/api/upload_video">
-   <p><input type="file" name="file">
-   <input type="submit" value="Отправить"></p>
+   <p>
+       <input type="file" name="image" accept="image/png, image/jpeg, image/jpg">
+       <input type="file" name="video" accept="video/*">
+        <input type="submit" value="Отправить">
+   </p>
   </form>
 </body>
 </html>

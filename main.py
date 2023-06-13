@@ -47,43 +47,44 @@ if __name__ == "__main__":
 # Dependency
 
 
-@app.get("/users/{user_id}")
-async def read_user(user_id: uuid.UUID, db: Session = Depends(get_db)):
-    db_user = crud.get_user(db, user_id=user_id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+# @app.get("/users/{user_id}")
+# async def read_user(user_id: uuid.UUID, db: Session = Depends(get_db)):
+#     db_user = crud.get_user(db, user_id=user_id)
+#     if db_user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return db_user
 
 
-@app.get("/users_by_email/{user_email}")
-async def read_user_by_email(user_email: str, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user_email)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+# @app.get("/users_by_email/{user_email}")
+# async def read_user_by_email(user_email: str, db: Session = Depends(get_db)):
+#     db_user = crud.get_user_by_email(db, email=user_email)
+#     if db_user is None:
+#         raise HTTPException(status_code=404, detail="User not found")
+#     return db_user
 
 
-@app.get("/well_done")
-async def well_done(user: schemas.User = Depends(get_current_user)):
-    return "Well done " + user.email
+# @app.get("/well_done")
+# async def well_done(user: schemas.User = Depends(get_current_user)):
+#     return "Well done " + user.email
 
 
+@app.get('/')
+async def mainPage(request:Request,db: Session = Depends(get_db)):
+    list_of_videos = crud.get_videos(db)
+    return templates.TemplateResponse("index.html", {'request':request, "videos":list_of_videos})
 
-
-@app.get('/play_video/{video_name}')
+@app.get('/play_video/')
 async def play_video(video_name: str, request: Request):
-    # video_path = files.get(video_name)
-    # if video_path:
-        return templates.TemplateResponse(
-            'play_html5.html', {'request': request, 'video': {'name': video_name}})
+   return templates.TemplateResponse(
+       'play_html5.html', {'request': request, 'video': {'name': video_name}})
     # else:
     #     return Response(status_code=404)
 
 @app.get("/login_access")
-async def login_on_site(request:Request):
+async def login_on_site(request:Request, db: Session = Depends(get_db)):
     try:
         id = uuid.UUID(request.cookies.get("User_id"))
-        user = crud.get_user_by_id(next(get_db()),id)
+        user = crud.get_user_by_id(db,id)
         return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email}})
     except:
         return templates.TemplateResponse("login.html", {"request": request})

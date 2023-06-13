@@ -32,4 +32,6 @@ class TokenData(BaseModel):
 
 
 class Video(BaseModel):
+    id: UUID4
     video_path: str
+    image_path:str

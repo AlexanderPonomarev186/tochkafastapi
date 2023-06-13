@@ -12,3 +12,12 @@ class User(Base):
     hashed_password = Column(String)
     salt = Column(String)
     is_active = Column(Boolean, default=True)
+    # role = Column(Integer, default=0)
+
+
+class Video(Base):
+    __tablename__ = "videos"
+
+    id = Column(UUID, primary_key=True, index=True)
+    image = Column(String, unique=True, index=True)
+    video = Column(String, unique=True, index=True)
