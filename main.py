@@ -1,6 +1,6 @@
 import os
 import uvicorn
-from fastapi import FastAPI, Depends, HTTPException, Request
+from fastapi import FastAPI, Depends, HTTPException, Request, Form
 from pathlib import Path
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
@@ -10,13 +10,13 @@ from sqlalchemy.orm import Session
 import uuid
 
 from starlette import status
+from starlette.responses import RedirectResponse
 
 import crud
+import login
 import models
-import schemas
-import fastapi_jsonrpc as jsonrpc
 from database import engine, get_db
-from login import get_current_user, router_jwt
+from login import router_jwt
 from api import router_api
 
 models.Base.metadata.create_all(bind=engine)
@@ -73,6 +73,13 @@ async def mainPage(request:Request,db: Session = Depends(get_db)):
     list_of_videos = crud.get_videos(db)
     return templates.TemplateResponse("index.html", {'request':request, "videos":list_of_videos})
 
+@app.post('/find')
+async def findVideos(request:Request, db: Session = Depends(get_db), query: str = Form(None)):
+    if query is None:
+        return templates.TemplateResponse("none.html",{"request":request})
+    list_of_videos = crud.get_videos_by_name(db, query)
+    return templates.TemplateResponse("index.html", {'request':request, "videos":list_of_videos})
+
 @app.get('/play_video/')
 async def play_video(video_name: str, request: Request):
    return templates.TemplateResponse(
@@ -83,26 +90,27 @@ async def play_video(video_name: str, request: Request):
 @app.get("/login_access")
 async def login_on_site(request:Request, db: Session = Depends(get_db)):
     try:
-        id = uuid.UUID(request.cookies.get("User_id"))
-        user = crud.get_user_by_id(db,id)
-        return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email}})
+        user = login.get_current_user(request)
+        user = crud.get_user_by_id(db,user.id)
+        return RedirectResponse(f"../user/{user.id}", status_code=status.HTTP_303_SEE_OTHER)
     except:
         return templates.TemplateResponse("login.html", {"request": request})
 
 @app.get("/signin")
 async def signin(request:Request):
-    return templates.TemplateResponse("Signin.html", {"request": request})
+    return templates.TemplateResponse("signin.html", {"request": request})
 
 @app.post("/user/{user_id}")
-async def user_page(request:Request, user_id:uuid.UUID, db: Session = Depends(get_db)):
+async def user_page(request:Request,db: Session = Depends(get_db)):
     try:
-        if request.cookies.get("User_id") != str(user_id):
-            raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-        )
-        user = crud.get_user_by_id(db,user_id)
+        user = login.get_current_user(request)
+        # if request.cookies.get("User_id") != str(user_id):
+        #     raise HTTPException(
+        # status_code=status.HTTP_401_UNAUTHORIZED,
+        # detail="Could not validate credentials",
+        # headers={"WWW-Authenticate": "Bearer"},
+        # )
+        user = crud.get_user_by_id(db,user.id)
         return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email}})
     except:
         raise HTTPException(
@@ -111,5 +119,23 @@ async def user_page(request:Request, user_id:uuid.UUID, db: Session = Depends(ge
         headers={"WWW-Authenticate": "Bearer"},
         )
 
+@app.get("/user/{user_id}")
+async def user_page(request:Request, db: Session = Depends(get_db)):
+    try:
+        user = login.get_current_user(request)
+        # if request.cookies.get("User_id") != str(user_id):
+        #     raise HTTPException(
+        # status_code=status.HTTP_401_UNAUTHORIZED,
+        # detail="Could not validate credentials",
+        # headers={"WWW-Authenticate": "Bearer"},
+        # )
+        user = crud.get_user_by_id(db,user.id)
+        return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email, "username": user.username}})
+    except:
+        raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+        )
 
 

@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Union
+from typing_extensions import Annotated
 from sqlalchemy.orm import Session
-from fastapi import Depends, HTTPException, status, APIRouter, Request, Response
+from fastapi import Depends, HTTPException, status, APIRouter, Request, Form
 from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from starlette.responses import JSONResponse, RedirectResponse
@@ -34,8 +35,8 @@ def token(user):
 
 
 @router_jwt.post("/signin_create_user")
-async def create_user(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = schemas.UserCreate(**{"email": form_data.username, "password":form_data.password})
+async def create_user(username: str = Form(), login: str = Form(), password: str = Form(),  db: Session = Depends(get_db)):
+    user = schemas.UserCreate(**{"email": login, "password":password, "username":username})
     db_user = crud.get_user_by_email(db, email=user.email.lower())
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -55,14 +56,13 @@ async def login_for_access_token(
     access_token = token(user)
     response = RedirectResponse(f"../user/{user.id}")
     response.set_cookie(key="Authorization", value=access_token, secure=True, httponly=True)
-    response.set_cookie(key="User_id", value=user.id, secure=True, httponly=True)
+    # response.set_cookie(key="User_id", value=user.id, secure=True, httponly=True)
     return response
 
 @router_jwt.post("/logout")
 async def logout():
-    response = JSONResponse({"status":"logout"})
+    response = RedirectResponse(f"../", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie("Authorization")
-    response.delete_cookie("User_id")
     return response
 
 
@@ -73,8 +73,8 @@ def get_current_user(request: Request):
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    token = request.cookies.get("Authorization")
     try:
+        token = request.cookies.get("Authorization")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
         if email is None:

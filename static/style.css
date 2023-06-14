@@ -1,3 +1,7 @@
+.body
+{
+    font-family: "Roboto";
+}
 .header {
     display: flex;
     flex-wrap: wrap;
@@ -5,6 +9,7 @@
     margin: 0;
     list-style: none;
     margin-bottom:30px;
+    background: blueviolet;
 }
 .header .h {
     font-size: 32px;
@@ -18,7 +23,10 @@
     margin-right:40px;
     text-decoration:none;
 }
+.header form{
+    margin-right: 40px;
+}
 
 .body{
-    background: azure;
+    background: white;
 }
