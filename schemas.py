@@ -6,6 +6,7 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
+    username: str
     password: str
 
 
@@ -33,5 +34,7 @@ class TokenData(BaseModel):
 
 class Video(BaseModel):
     id: UUID4
+    name: str
     video_path: str
     image_path:str
+    user: str

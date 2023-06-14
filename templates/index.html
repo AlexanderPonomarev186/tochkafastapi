@@ -1,14 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+   <meta charset="UTF-8">
+   <meta http-equiv="X-UA-Compatible" content="IE=edge">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <link rel="stylesheet" href="https://cdn.plyr.io/3.6.8/plyr.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Philosopher:ital,wght@0,400;0,700;1,400&family=Roboto:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="../static/style.css" rel="stylesheet">
+   <title>Main page</title>
 </head>
-<body>
-<p>
-    {% for video in videos %}
+<body class="body">
+    <header class="header">
+        <a href="../" class="h">Main Page</a>
+        <form enctype="multipart/form-data" method="post" action="/find">
+            <input type="text" name="query">
+            <input type="submit" name="submit">
+        </form>
+        <a href="/login_access">Login</a>
+    </header>
+    <p>
+        {% for video in videos %}
+        <a href="/play_video/?video_name={{video.video}}">
         <img src="{{video.image}}" alt="asd" width="380" height="214"/>
-    {% endfor %}
-</p>
+        </a>
+        <p>{{video.name}}</p>
+        <p>{{video.user}}</p>
+        {% endfor %}
+    </p>
 </body>
 </html>

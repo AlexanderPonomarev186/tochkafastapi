@@ -12,15 +12,17 @@
    <title>{{user.user_id}}</title>
 </head>
 <body>
-    <h1>{{user.user_login}}</h1>
-    <h2>{{user.user_id}}</h2>
+    <h1>{{user.username}}</h1>
+    <h2>{{user.user_login}}</h2>
+    <h3>{{user.user_id}}</h3>
 <form method="post" action="/login/logout">
     <input type="submit" value="logout">
 </form>
   <form enctype="multipart/form-data" method="post" action="/api/upload_video">
    <p>
-       <input type="file" name="image" accept="image/png, image/jpeg, image/jpg">
-       <input type="file" name="video" accept="video/*">
+       <input type="text" name="name" required>
+       <input type="file" name="image" accept="image/png, image/jpeg, image/jpg" required>
+       <input type="file" name="video" accept="video/*" required>
         <input type="submit" value="Отправить">
    </p>
   </form>

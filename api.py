@@ -1,13 +1,14 @@
 import os
 import uuid
 from typing import Union
-from fastapi import Depends, APIRouter, UploadFile, Request
+from fastapi import Depends, APIRouter, UploadFile, Request, Form
 from starlette import status
 from starlette.responses import JSONResponse, RedirectResponse
 
 import botofunctions
 import cloudfunctions
 import crud
+import login
 from database import get_db
 import schemas
 from sqlalchemy.orm import Session
@@ -23,12 +24,12 @@ async def get_video_s3(video_name:str):
 
 
 @router_api.post("/upload_video")
-async def upload_video(request:Request,video: Union[UploadFile, None] = None, image:Union[UploadFile,None] = None, db: Session = Depends(get_db)):
+async def upload_video(request:Request,video: Union[UploadFile, None] = None, image:Union[UploadFile,None] = None, name: str = Form(), db: Session = Depends(get_db)):
     try:
-        if request.cookies.get("User_id") is None:
-            return RedirectResponse("/signin", status_code=status.HTTP_303_SEE_OTHER)
+        user = login.get_current_user(request)
+        user = crud.get_user_by_id(db, user.id)
     except Exception:
-        return RedirectResponse("/signin")
+        return RedirectResponse("/login_access", status_code=status.HTTP_303_SEE_OTHER)
     try:
         id = uuid.uuid4()
         video_temp = video.file.read()
@@ -47,8 +48,10 @@ async def upload_video(request:Request,video: Union[UploadFile, None] = None, im
     cloudfunctions.put_file_to_server(video_id_name)
     cloudfunctions.put_file_to_server(image_id_name)
     uploaded_video = schemas.Video(id = id,
-                                   video_path=botofunctions.create_presigned_url(video_id_name),
-                                   image_path=botofunctions.create_presigned_url(image_id_name))
+                                   name=name,
+                                   video_path=video_id_name,
+                                   image_path=botofunctions.create_presigned_url(image_id_name),
+                                   user=user.username)
     crud.create_video(db=db,video=uploaded_video)
     os.remove(video_id_name)
     os.remove(image_id_name)
