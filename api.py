@@ -55,4 +55,4 @@ async def upload_video(request:Request,video: Union[UploadFile, None] = None, im
     crud.create_video(db=db,video=uploaded_video)
     os.remove(video_id_name)
     os.remove(image_id_name)
-    return RedirectResponse(f"../user/{user.id}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(f"../", status_code=status.HTTP_303_SEE_OTHER)
