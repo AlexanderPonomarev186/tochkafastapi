@@ -4,7 +4,9 @@ def put_file_to_server(name_of_file: str):
     session = boto3.session.Session()
     s3 = session.client(
         service_name='s3',
-        endpoint_url='https://tochkateststorage.storage.yandexcloud.net'
+        endpoint_url='https://tochkateststorage.storage.yandexcloud.net',
+        aws_access_key_id = "YCAJEA8dSV5_-ldxhVO_MRtv5",
+        aws_secret_access_key = "YCOlMQlCHt98u4V_53yVFTujzV5fsHAGD_LyVLvD"
     )
 
     s3.upload_file(name_of_file, 'tochkateststorage', name_of_file)
