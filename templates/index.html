@@ -20,9 +20,9 @@
         </form>
         <a href="/login_access">Login</a>
     </header>
-    <ul class="videos">
+    <ul style="display:flex; flex-direction: row; list-style-type: none;justify-content: start; margin:0;">
         {% for video in videos %}
-        <li style="">
+        <li style="margin:40px;">
             <a href="/play_video/?video_name={{video.video}}">
             <img src="{{video.image}}" alt="asd" width="380" height="214"/>
             </a>
