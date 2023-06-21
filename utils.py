@@ -3,6 +3,7 @@ import random
 import string
 
 from sqlalchemy.orm import Session
+from starlette.responses import RedirectResponse
 
 import crud
 from fastapi import HTTPException
@@ -27,10 +28,10 @@ def validate_password(password: str, hashed_password: str, salt: str) -> bool:
     hash_input, salt = hash_password(password, salt)
     return hash_input == hashed_password
 
-def check_password(user: schemas.Login, db: Session) -> models.User:
+def check_password(user: schemas.Login, db: Session):
     db_user = crud.get_user_by_email(db, email=user.login.lower())
     if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        return RedirectResponse("/signin")
     validate = validate_password(user.password, db_user.hashed_password, db_user.salt)
     if not validate:
         raise HTTPException(status_code=400, detail="Wrong password")

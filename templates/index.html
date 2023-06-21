@@ -15,19 +15,21 @@
     <header class="header">
         <a href="../" class="h">Main Page</a>
         <form enctype="multipart/form-data" method="post" action="/find">
-            <input type="text" name="query">
+            <input type="text" name="query" required>
             <input type="submit" name="submit">
         </form>
         <a href="/login_access">Login</a>
     </header>
-    <p>
+    <ul class="videos">
         {% for video in videos %}
-        <a href="/play_video/?video_name={{video.video}}">
-        <img src="{{video.image}}" alt="asd" width="380" height="214"/>
-        </a>
-        <p>{{video.name}}</p>
-        <p>{{video.user}}</p>
+        <li style="">
+            <a href="/play_video/?video_name={{video.video}}">
+            <img src="/api/get_video_s3/{{video.image}}" alt="asd" width="380" height="214"/>
+            </a>
+            <p>{{video.name}}</p>
+            <p>{{video.user}}</p>
+        </li>
         {% endfor %}
-    </p>
+    </ul>
 </body>
 </html>

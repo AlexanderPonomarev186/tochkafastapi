@@ -11,7 +11,15 @@
     <link href="../static/style.css" rel="stylesheet">
    <title>{{user.user_id}}</title>
 </head>
-<body>
+<body class="body">
+    <header class="header">
+        <a href="../" class="h">Main Page</a>
+        <form enctype="multipart/form-data" method="post" action="/find">
+            <input type="text" name="query" required>
+            <input type="submit" name="submit">
+        </form>
+        <a href="/login_access">Login</a>
+    </header>
     <h1>{{user.username}}</h1>
     <h2>{{user.user_login}}</h2>
     <h3>{{user.user_id}}</h3>
@@ -22,7 +30,7 @@
    <p>
        <input type="text" name="name" required>
        <input type="file" name="image" accept="image/png, image/jpeg, image/jpg" required>
-       <input type="file" name="video" accept="video/*" required>
+       <input type="file" name="video" accept="video/mp4" required>
         <input type="submit" value="Отправить">
    </p>
   </form>

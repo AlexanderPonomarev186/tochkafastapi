@@ -111,7 +111,7 @@ async def user_page(request:Request,db: Session = Depends(get_db)):
         # headers={"WWW-Authenticate": "Bearer"},
         # )
         user = crud.get_user_by_id(db,user.id)
-        return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email}})
+        return templates.TemplateResponse("user.html",{"request":request, "user":{"user_id": user.id, "user_login":user.email, "username": user.username}})
     except:
         raise HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
