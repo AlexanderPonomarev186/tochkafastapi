@@ -50,9 +50,10 @@ async def upload_video(request:Request,video: Union[UploadFile, None] = None, im
     uploaded_video = schemas.Video(id = id,
                                    name=name,
                                    video_path=video_id_name,
-                                   image_path=botofunctions.create_presigned_url(image_id_name),
+                                   image_path=image_id_name,
                                    user=user.username)
     crud.create_video(db=db,video=uploaded_video)
     os.remove(video_id_name)
     os.remove(image_id_name)
-    return RedirectResponse(f"../", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse("../", status_code=status.HTTP_303_SEE_OTHER)
+

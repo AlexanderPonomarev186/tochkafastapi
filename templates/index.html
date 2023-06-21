@@ -20,11 +20,11 @@
         </form>
         <a href="/login_access">Login</a>
     </header>
-    <ul style="display:flex; flex-direction: row; list-style-type: none;justify-content: start; margin:0;">
+    <ul class="videos">
         {% for video in videos %}
-        <li style="margin:40px;">
+        <li style="">
             <a href="/play_video/?video_name={{video.video}}">
-            <img src="{{video.image}}" alt="asd" width="380" height="214"/>
+            <img src="/api/get_video_s3/{{video.image}}" alt="asd" width="380" height="214"/>
             </a>
             <p>{{video.name}}</p>
             <p>{{video.user}}</p>

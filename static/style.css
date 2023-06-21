@@ -30,4 +30,14 @@
 .body{
     background: white;
 }
+.videos{
+    display:flex;
+    flex-direction: row;
+    list-style-type: none;
+    justify-content: start;
+    margin:0;
+}
+.videos li{
+    margin:40px;
+}
 

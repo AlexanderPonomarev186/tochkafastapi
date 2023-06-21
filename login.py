@@ -47,6 +47,7 @@ async def create_user(username: str = Form(), login: str = Form(), password: str
     response.set_cookie(key="User_id", value=user.id, secure=True, httponly=True)
     return response
 
+
 @router_jwt.post("/token", response_model=schemas.Token)
 async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
