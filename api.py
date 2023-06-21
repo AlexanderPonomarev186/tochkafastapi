@@ -56,3 +56,4 @@ async def upload_video(request:Request,video: Union[UploadFile, None] = None, im
     os.remove(video_id_name)
     os.remove(image_id_name)
     return RedirectResponse("../", status_code=status.HTTP_303_SEE_OTHER)
+
